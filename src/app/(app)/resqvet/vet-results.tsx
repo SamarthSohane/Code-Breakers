@@ -28,7 +28,11 @@ export default function VetResults({ animal }: VetResultsProps) {
         setError(null);
         
         const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject);
+            if (!navigator.geolocation) {
+                reject(new Error("Geolocation is not supported by your browser."));
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(resolve, reject);
         });
         
         const location = `${position.coords.latitude}, ${position.coords.longitude}`;
@@ -36,7 +40,11 @@ export default function VetResults({ animal }: VetResultsProps) {
         const result = await findTopRatedVetsAction({ location });
 
         if (result.success) {
-          setVets(result.data);
+          if (result.data && result.data.length > 0) {
+            setVets(result.data);
+          } else {
+            setVets([]); // Set to empty array to indicate no results found
+          }
         } else {
           setError(result.error);
           toast({
@@ -46,9 +54,9 @@ export default function VetResults({ animal }: VetResultsProps) {
           });
         }
       } catch (e: any) {
-        let errorMessage = 'An unexpected error occurred.';
+        let errorMessage = 'An unexpected error occurred while fetching vet data.';
         if (e.code === 1) { // Geolocation permission denied
-            errorMessage = 'Location access is required to find nearby vets. Please enable it in your browser settings.';
+            errorMessage = 'Location access is required to find nearby vets. Please enable it in your browser settings and try again.';
         } else if (typeof e.message === 'string') {
             errorMessage = e.message;
         }
@@ -82,9 +90,13 @@ export default function VetResults({ animal }: VetResultsProps) {
 
   if (!vets || vets.length === 0) {
     return (
-        <div className="text-center text-muted-foreground">
-            <p>No veterinarians found for your location.</p>
-        </div>
+        <Alert className="max-w-2xl mx-auto">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>No Vets Found</AlertTitle>
+            <AlertDescription>
+                We couldn't find any veterinarians in a 200km radius for your location. You could try again later.
+            </AlertDescription>
+        </Alert>
     );
   }
 
@@ -96,7 +108,7 @@ export default function VetResults({ animal }: VetResultsProps) {
           <Card key={index} className="flex flex-col overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
             <div className="relative h-48 w-full">
               <Image
-                src={vet.image || 'https://picsum.photos/seed/vet-placeholder/600/400'}
+                src={vet.image || `https://picsum.photos/seed/vet${index}/600/400`}
                 alt={`Photo of ${vet.name}`}
                 fill
                 className="object-cover"
@@ -107,26 +119,26 @@ export default function VetResults({ animal }: VetResultsProps) {
             </CardHeader>
             <CardContent className="flex-grow space-y-3 text-sm">
                 <div className="flex items-start gap-3 text-muted-foreground">
-                    <MapPin className="mt-1" />
+                    <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
                     <span>{vet.address} ({vet.distance})</span>
                 </div>
-                <div className="flex items-center gap-3 text-muted-foreground">
-                    <Clock />
+                <div className="flex items-start gap-3 text-muted-foreground">
+                    <Clock className="h-4 w-4 mt-1 flex-shrink-0" />
                     <span>{vet.opening_hours}</span>
                 </div>
-                <div className="flex items-center gap-3 text-muted-foreground">
-                    <DollarSign />
+                <div className="flex items-start gap-3 text-muted-foreground">
+                    <DollarSign className="h-4 w-4 mt-1 flex-shrink-0" />
                     <span>{vet.fees}</span>
                 </div>
                 <div className="flex items-center gap-3 text-yellow-500">
-                    <Star className="fill-current" />
-                    <span className="font-bold">{vet.rating ? `${vet.rating.toFixed(1)} / 5.0` : 'No rating'}</span>
+                    <Star className="h-5 w-5 fill-current" />
+                    <span className="font-bold text-base">{vet.rating ? `${vet.rating.toFixed(1)} / 5.0` : 'No rating'}</span>
                 </div>
             </CardContent>
             <CardFooter className="bg-muted/50 p-3 grid grid-cols-2 gap-2">
                 <Button asChild variant="outline" size="sm">
                     <a href={`tel:${vet.phone_number}`}>
-                        <Phone className="mr-2"/>
+                        <Phone />
                         Call
                     </a>
                 </Button>
@@ -136,7 +148,7 @@ export default function VetResults({ animal }: VetResultsProps) {
                         target="_blank"
                         rel="noopener noreferrer"
                     >
-                        <MapPin className="mr-2"/>
+                        <MapPin />
                         Directions
                     </a>
                 </Button>
@@ -151,7 +163,8 @@ export default function VetResults({ animal }: VetResultsProps) {
 const VetSkeletonLoader = () => (
     <div className="space-y-6">
         <h2 className="text-3xl font-bold font-headline text-center">
-            <Skeleton className="h-8 w-80 mx-auto" />
+            <Skeleton className="h-8 w-96 mx-auto mb-2" />
+            <Skeleton className="h-6 w-80 mx-auto" />
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(3)].map((_, i) => (
@@ -163,6 +176,7 @@ const VetSkeletonLoader = () => (
                     <CardContent className="space-y-4">
                         <Skeleton className="h-4 w-full" />
                         <Skeleton className="h-4 w-5/6" />
+                        <Skeleton className="h-4 w-full" />
                         <Skeleton className="h-4 w-2/3" />
                     </CardContent>
                     <CardFooter className="p-3 grid grid-cols-2 gap-2">

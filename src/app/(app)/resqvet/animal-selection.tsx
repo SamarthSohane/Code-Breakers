@@ -22,7 +22,7 @@ export default function AnimalSelection({ onAnimalSelect }: AnimalSelectionProps
                 <div
                   key={`${animal.name}-${index}`}
                   className={cn(
-                    'flex flex-col items-center justify-center p-3 rounded-lg border-2 border-transparent cursor-pointer transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-lg'
+                    'flex flex-col items-center justify-center p-3 rounded-lg border-2 border-transparent cursor-pointer transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-lg hover:border-primary'
                   )}
                   onClick={() => onAnimalSelect(animal.name)}
                 >
