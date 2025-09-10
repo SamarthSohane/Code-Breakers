@@ -1,4 +1,4 @@
-import VetSearch from './vet-search';
+import AnimalSelection from './animal-selection';
 
 export default function ResQVetPage() {
   return (
@@ -6,10 +6,10 @@ export default function ResQVetPage() {
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold font-headline tracking-tight text-foreground sm:text-5xl">ResQVet</h1>
         <p className="mt-3 text-lg text-muted-foreground">
-          Let our AI assistant find the best vets for your furry friend.
+          Immediate care, No hassle.
         </p>
       </div>
-      <VetSearch />
+      <AnimalSelection />
     </div>
   );
 }

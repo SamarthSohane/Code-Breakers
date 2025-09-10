@@ -1,0 +1,42 @@
+import React from 'react';
+
+// Using inline SVGs for custom icons as requested
+const DogIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.15 12.4_a_3.5 3.5 0 0 0 3.7 3.6c1.03.01 2.05-.3 2.89-.98"/><path d="M12.4 10.15_a_3.5 3.5 0 0 1 3.6 3.7c.01 1.03-.3 2.05-.98 2.89"/><path d="M16 8_c_0 2.2-1.8 4-4 4-1.2 0-2.4-.5-3.2-1.4"/><path d="M15 1_c-1.1 0-2 .9-2 2v2h4V3c0-1.1-.9-2-2-2Z"/><path d="M4 9_c-1.1 0-2 .9-2 2v2h4V11c0-1.1-.9-2-2-2Z"/><path d="M19 9_c1.1 0 2 .9 2 2v2h-4V11c0-1.1.9-2 2-2Z"/><path d="M8 17_c0-2.2 1.8-4 4-4 1.2 0 2.4.5 3.2 1.4"/><path d="M9 1_c1.1 0 2 .9 2 2v2H7V3c0-1.1.9-2 2-2Z"/><path d="M2.5 18.5_c-1.5 0-2.5-1-2.5-2.5_v-3.5c0-.8.7-1.5 1.5-1.5_h1c.8 0 1.5.7 1.5 1.5_v3.5c0 1.5-1 2.5-2.5 2.5z"/><path d="M21.5 18.5_c1.5 0 2.5-1 2.5-2.5_v-3.5c0-.8-.7-1.5-1.5-1.5_h-1c-.8 0-1.5.7-1.5 1.5_v3.5c0 1.5 1 2.5 2.5 2.5z"/></svg>;
+const CatIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5_c-2 0-2 2-2 2_v2_h4_v-2_c0-2-2-2-2-2z"/><path d="M19.5 13.5_c-1.5-1.5-3-1.5-3-1.5_s-1.5 0-3 1.5_c-1.5 1.5-1.5 3 0 3_c1.5 1.5 3 1.5 3 1.5_s1.5 0 3-1.5c1.5-1.5 1.5-3 0-3z"/><path d="M4.5 13.5_c1.5-1.5 3-1.5 3-1.5_s1.5 0 3 1.5_c1.5 1.5 1.5 3 0 3_c-1.5 1.5-3 1.5-3 1.5_s-1.5 0-3-1.5c-1.5-1.5-1.5-3 0-3z"/><path d="M18 10_c0 2-2 2-2 2_h-4_c-2 0-2-2-2-2"/><path d="M7 10_c0-2.2.8-4 2-4"/><path d="M17 10_c0-2.2-.8-4-2-4"/><path d="M15 2_c-1 0-1 1-1 1_s-1-1-1-1_c-1 0-1 1-1 1_v1h4V3_c0-1-1-1-1-1z"/></svg>;
+const RabbitIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15.5 14_c-1 0-1.5-.5-1.5-1.5_v-3_c0-1 .5-1.5 1.5-1.5_c1 0 1.5.5 1.5 1.5_v3_c0 1-.5 1.5-1.5 1.5z"/><path d="M8.5 14_c-1 0-1.5-.5-1.5-1.5_v-3_c0-1 .5-1.5 1.5-1.5_c1 0 1.5.5 1.5 1.5_v3_c0 1-.5 1.5-1.5 1.5z"/><path d="M12 20_c-3 0-5-2-5-5_c0-3 2-5 5-5_c3 0 5 2 5 5_c0 3-2 5-5 5z"/><path d="M9 4_c0-2-1-3-2-3_s-2 1-2 3_v4_c0 1.1.9 2 2 2_h1_c1.1 0 2-.9 2-2V4z"/><path d="M15 4_c0-2 1-3 2-3_s2 1 2 3_v4_c0 1.1-.9 2-2 2_h-1_c-1.1 0-2-.9-2-2V4z"/></svg>;
+const BirdIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 7_c0-2.2-1.8-4-4-4S8 4.8 8 7_c0 2.2 1.8 4 4 4_s4-1.8 4-4z"/><path d="M12 11_c-4.4 0-8 3.6-8 8_v2_h16_v-2_c0-4.4-3.6-8-8-8z"/><path d="M17 7_c-1.7 0-3 1.3-3 3"/><path d="M7 7_c1.7 0 3 1.3 3 3"/></svg>;
+const FishIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15.7 12_c0-1.7-1.3-3-3-3_s-3 1.3-3 3_1.3 3 3 3_3-1.3 3-3z"/><path d="M12 22_C6.5 22 2 17.5 2 12_S6.5 2 12 2_s10 4.5 10 10_c0 3.3-1.7 6.2-4.2 8"/><path d="M22 12_c-3 0-5-2-5-2_s2-2 5-2"/><path d="M12 18_c-1.5 0-3-.5-4-1.5"/></svg>;
+const TurtleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 8_c0-1.7-1.3-3-3-3S9 6.3 9 8_v2_h6V8z"/><path d="M9 14_c-2.5 0-4-1.8-4-4_h14_c0 2.2-1.5 4-4 4"/><path d="M12 21_c-5 0-9-4-9-9_s4-9 9-9_9 4 9 9-4 9-9 9z"/><path d="M3.5 14_c-.8 0-1.5-.7-1.5-1.5V9"/><path d="M20.5 14_c.8 0 1.5-.7 1.5-1.5V9"/><path d="M6 20_c-1.1 0-2-1-2-2_v-1"/><path d="M18 20_c1.1 0 2-1 2-2_v-1"/></svg>;
+const SnakeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 12_m-2 0_a2 2 0 1 0 4 0_a2 2 0 1 0-4 0"/><path d="M4 12_c0-4.4 3.6-8 8-8_s8 3.6 8 8-3.6 8-8 8-8-3.6-8-8_h2_c0 3.3 2.7 6 6 6_s6-2.7 6-6-2.7-6-6-6-6 2.7-6 6z"/><path d="M4 14_c0 2.2 1.8 4 4 4_h8_c2.2 0 4-1.8 4-4"/><path d="M10 2_c0 1.1.9 2 2 2_s2-.9 2-2"/><path d="M16 12_c0-1.1.9-2 2-2_s2 .9 2 2"/><path d="M6 12_c0-1.1.9-2 2-2_s2 .9 2 2"/></svg>;
+const HorseIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 12_a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M8 22_v-2_c0-1.1.9-2 2-2_h4_c1.1 0 2 .9 2 2_v2"/><path d="M4 14_c0-2.2 1.8-4 4-4_h8_c2.2 0 4 1.8 4 4_v2_H4_v-2z"/><path d="M5 4_c0-1.1.9-2 2-2_h1_c1.1 0 2 .9 2 2_v4_H5V4z"/><path d="M15 4_c0-1.1.9-2 2-2_h1_c1.1 0 2 .9 2 2_v4_h-5V4z"/><path d="M12 10_c-2.2 0-4-1.8-4-4"/><path d="M12 10_c2.2 0 4-1.8 4-4"/></svg>;
+const LizardIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 12_m-2 0_a2 2 0 1 0 4 0_a2 2 0 1 0-4 0"/><path d="M2 12_c0-5.5 4.5-10 10-10_s10 4.5 10 10-4.5 10-10 10S2 17.5 2 12z"/><path d="M4 12_c0-4.4 3.6-8 8-8_s8 3.6 8 8-3.6 8-8 8-8-3.6-8-8_h2_c0 3.3 2.7 6 6 6_s6-2.7 6-6-2.7-6-6-6-6 2.7-6 6z"/><path d="M2 14_h20"/><path d="M4 8_L8 4"/><path d="M20 8_l-4-4"/><path d="M4 16_l4 4"/><path d="M20 16_l-4 4"/></svg>;
+const HamsterIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8_a2 2 0 0 0-4 0"/><path d="M8 8_a2 2 0 0 1 4 0"/><path d="M12 18_c-3.3 0-6-2.7-6-6_s2.7-6 6-6_6 2.7 6 6-2.7 6-6 6z"/><path d="M12 12_c-1.1 0-2-.9-2-2_s.9-2 2-2_2 .9 2 2-.9 2-2 2z"/><path d="M19 12_c0 3.9-3.1 7-7 7_s-7-3.1-7-7_3.1-7 7-7_c1.5 0 2.9.5 4 1.3"/><path d="M18 4_c0-1.1.9-2 2-2_s2 .9 2 2-.9 2-2 2z"/><path d="M6 4_C4.9 4 4 3.1 4 2_s.9-2 2-2_2 .9 2 2z"/></svg>;
+const GuineaPigIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 9_a1 1 0 0 0-2 0"/><path d="M9 9_a1 1 0 0 1 2 0"/><path d="M12 14_c-2.2 0-4-1.8-4-4_s1.8-4 4-4_4 1.8 4 4-1.8 4-4 4z"/><path d="M20 16_c0-4.4-3.6-8-8-8S4 11.6 4 16_c0 3.3 2 6 5 6_h6_c3 0 5-2.7 5-6z"/><path d="M5 16_c-1.1 0-2-.9-2-2_v-1"/><path d="M19 16_c1.1 0 2-.9 2-2_v-1"/></svg>;
+const FerretIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 12_m-2 0_a2 2 0 1 0 4 0_a2 2 0 1 0-4 0"/><path d="M3 12_c0-5 4-9 9-9_s9 4 9 9-4 9-9 9-9-4-9-9_h1_c0-4.4 3.6-8 8-8_s8 3.6 8 8-3.6 8-8 8-8-3.6-8-8z"/><path d="M21 12_c1.1 0 2 .9 2 2_v1"/><path d="M3 12_c-1.1 0-2 .9-2 2_v1"/><path d="M14 4_c0-1.1.9-2 2-2_s2 .9 2 2"/><path d="M8 4_C6.9 4 6 3.1 6 2_s.9-2 2-2"/></svg>;
+
+export const animals = [
+  { name: 'Dog', icon: <DogIcon /> },
+  { name: 'Cat', icon: <CatIcon /> },
+  { name: 'Rabbit', icon: <RabbitIcon /> },
+  { name: 'Bird', icon: <BirdIcon /> },
+  { name: 'Fish', icon: <FishIcon /> },
+  { name: 'Turtle', icon: <TurtleIcon /> },
+  { name: 'Hamster', icon: <HamsterIcon /> },
+  { name: 'Guinea Pig', icon: <GuineaPigIcon /> },
+  { name: 'Snake', icon: <SnakeIcon /> },
+  { name: 'Lizard', icon: <LizardIcon /> },
+  { name: 'Horse', icon: <HorseIcon /> },
+  { name: 'Ferret', icon: <FerretIcon /> },
+  { name: 'Dog', icon: <DogIcon /> },
+  { name: 'Cat', icon: <CatIcon /> },
+  { name: 'Rabbit', icon: <RabbitIcon /> },
+  { name: 'Bird', icon: <BirdIcon /> },
+  { name: 'Fish', icon: <FishIcon /> },
+  { name: 'Turtle', icon: <TurtleIcon /> },
+  { name: 'Hamster', icon: <HamsterIcon /> },
+  { name: 'Guinea Pig', icon: <GuineaPigIcon /> },
+  { name: 'Snake', icon: <SnakeIcon /> },
+  { name: 'Lizard', icon: <LizardIcon /> },
+  { name: 'Horse', icon: <HorseIcon /> },
+  { name: 'Ferret', icon: <FerretIcon /> },
+];
