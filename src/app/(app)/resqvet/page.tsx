@@ -1,6 +1,12 @@
+'use client';
+
+import { useState } from 'react';
 import AnimalSelection from './animal-selection';
+import VetResults from './vet-results';
 
 export default function ResQVetPage() {
+  const [selectedAnimal, setSelectedAnimal] = useState<string | null>(null);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-8">
@@ -9,7 +15,11 @@ export default function ResQVetPage() {
           Immediate care, No hassle.
         </p>
       </div>
-      <AnimalSelection />
+      {!selectedAnimal ? (
+        <AnimalSelection onAnimalSelect={setSelectedAnimal} />
+      ) : (
+        <VetResults animal={selectedAnimal} />
+      )}
     </div>
   );
 }

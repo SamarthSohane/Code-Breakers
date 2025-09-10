@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { animals } from '@/lib/animals';
 import { cn } from '@/lib/utils';
 
-export default function AnimalSelection() {
-  const [selectedAnimal, setSelectedAnimal] = useState<string | null>(null);
+interface AnimalSelectionProps {
+  onAnimalSelect: (animal: string) => void;
+}
+
+export default function AnimalSelection({ onAnimalSelect }: AnimalSelectionProps) {
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -20,12 +22,9 @@ export default function AnimalSelection() {
                 <div
                   key={`${animal.name}-${index}`}
                   className={cn(
-                    'flex flex-col items-center justify-center p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:scale-110',
-                    selectedAnimal === animal.name
-                      ? 'border-primary bg-primary/10 scale-110'
-                      : 'border-transparent hover:border-primary/50 hover:bg-accent/50'
+                    'flex flex-col items-center justify-center p-3 rounded-lg border-2 border-transparent cursor-pointer transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-lg'
                   )}
-                  onClick={() => setSelectedAnimal(animal.name)}
+                  onClick={() => onAnimalSelect(animal.name)}
                 >
                   <div className="w-16 h-16 flex items-center justify-center text-foreground">
                     {animal.icon}
