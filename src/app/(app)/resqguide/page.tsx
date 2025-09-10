@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import AnimalSelection from '../resqvet/animal-selection';
+import AnimalSelection from './animal-selection';
 import InjuryGuide from './injury-guide';
 
 export default function ResQGuidePage() {
