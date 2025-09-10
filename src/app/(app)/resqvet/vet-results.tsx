@@ -120,7 +120,7 @@ export default function VetResults({ animal }: VetResultsProps) {
                 </div>
                 <div className="flex items-center gap-3 text-yellow-500">
                     <Star className="fill-current" />
-                    <span className="font-bold">{vet.rating.toFixed(1)} / 5.0</span>
+                    <span className="font-bold">{vet.rating ? `${vet.rating.toFixed(1)} / 5.0` : 'No rating'}</span>
                 </div>
             </CardContent>
             <CardFooter className="bg-muted/50 p-3 grid grid-cols-2 gap-2">
