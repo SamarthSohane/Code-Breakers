@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Logo } from '@/components/icons/logo';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useEffect, useState } from 'react';
 
@@ -28,7 +28,6 @@ export default function Header() {
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
            <Avatar>
-            <AvatarImage src="https://picsum.photos/seed/user-avatar/100/100" data-ai-hint="user avatar" />
             <AvatarFallback>{initial}</AvatarFallback>
           </Avatar>
         </div>
