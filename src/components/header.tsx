@@ -3,17 +3,18 @@
 import Link from 'next/link';
 import { Logo } from '@/components/icons/logo';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from './ui/button';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useEffect, useState } from 'react';
 
 export default function Header() {
   const [name] = useLocalStorage('userName', '');
-  const [initial, setInitial] = useState('U');
+  const [initial, setInitial] = useState('');
 
   useEffect(() => {
     if (name && typeof name === 'string' && name.length > 0) {
       setInitial(name.charAt(0).toUpperCase());
+    } else {
+      setInitial('U'); // Default initial
     }
   }, [name]);
 

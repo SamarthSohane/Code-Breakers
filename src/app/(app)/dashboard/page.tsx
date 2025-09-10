@@ -5,19 +5,19 @@ import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/ca
 const categories = [
   {
     title: 'ResQVet',
-    description: 'Find top-rated veterinarians in your neighborhood.',
+    description: 'Immediate care, No hassle.',
     href: '/resqvet',
     icon: <Stethoscope className="h-12 w-12 mb-4 text-accent" />,
   },
   {
     title: 'ResQNest',
-    description: 'Discover local animal shelters and foster homes.',
+    description: 'No paw left without a door',
     href: '/resqnest',
     icon: <Home className="h-12 w-12 mb-4 text-accent" />,
   },
   {
     title: 'ResQGuide',
-    description: 'Access essential resources on pet care.',
+    description: 'Confidence in a Crisis',
     href: '/resqguide',
     icon: <BookOpen className="h-12 w-12 mb-4 text-accent" />,
   },
