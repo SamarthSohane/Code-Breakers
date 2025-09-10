@@ -20,7 +20,7 @@ export default function SplashScreen({ isVisible }: { isVisible: boolean }) {
       <div className="animate-scale-in animate-fade-in">
         <Logo size="text-7xl md:text-8xl" />
         <p className="mt-4 text-center text-lg text-primary-foreground font-headline">
-          Your trusted companion for pet rescue and care.
+          Rescue made simple, Care made sure.
         </p>
       </div>
     </div>
