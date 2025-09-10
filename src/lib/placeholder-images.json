@@ -1,3 +1,28 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "shelter-1",
+      "description": "A friendly dog looking at the camera.",
+      "imageUrl": "https://picsum.photos/seed/shelter1/600/400",
+      "imageHint": "dog shelter"
+    },
+    {
+      "id": "shelter-2",
+      "description": "A playful kitten with a ball of yarn.",
+      "imageUrl": "https://picsum.photos/seed/shelter2/600/400",
+      "imageHint": "cat shelter"
+    },
+    {
+      "id": "shelter-3",
+      "description": "A group of puppies in a basket.",
+      "imageUrl": "https://picsum.photos/seed/shelter3/600/400",
+      "imageHint": "puppies basket"
+    },
+    {
+      "id": "shelter-4",
+      "description": "A calm older dog resting on a rug.",
+      "imageUrl": "https://picsum.photos/seed/shelter4/600/400",
+      "imageHint": "senior dog"
+    }
+  ]
 }
