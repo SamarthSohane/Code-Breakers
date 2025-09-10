@@ -5,22 +5,33 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { MapPin } from 'lucide-react';
 
 interface LocationAccessPageProps {
-  onLocationSuccess: () => void;
+  onLocationSuccess: (position: GeolocationPosition) => void;
+  onLocationError: () => void;
 }
 
-export default function LocationAccessPage({ onLocationSuccess }: LocationAccessPageProps) {
+export default function LocationAccessPage({ onLocationSuccess, onLocationError }: LocationAccessPageProps) {
   
   const handleLocationRequest = () => {
+    if (!navigator.geolocation) {
+      onLocationError(); // Geolocation not supported
+      return;
+    }
+
     navigator.geolocation.getCurrentPosition(
-      () => {
-        onLocationSuccess();
+      (position) => {
+        onLocationSuccess(position);
       },
       () => {
-        // Handle error or denial. For now, just proceed.
-        onLocationSuccess();
-      }
+        // Handle error or denial. The parent component decides what to do.
+        onLocationError();
+      },
+      { timeout: 10000 } // Add a timeout to avoid getting stuck
     );
   };
+
+  const handleSkip = () => {
+    onLocationError();
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4 animate-fade-in">
@@ -30,11 +41,14 @@ export default function LocationAccessPage({ onLocationSuccess }: LocationAccess
                     <MapPin className="w-12 h-12 text-primary" />
                 </div>
                 <CardTitle>Location Access</CardTitle>
-                <CardDescription>To provide you with the best local results, please allow access to your location.</CardDescription>
+                <CardDescription>To find the best local vets and shelters, please allow access to your location.</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-2">
                 <Button onClick={handleLocationRequest} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
                     Allow Location Access
+                </Button>
+                <Button onClick={handleSkip} className="w-full" variant="ghost">
+                    Skip for now
                 </Button>
             </CardContent>
         </Card>

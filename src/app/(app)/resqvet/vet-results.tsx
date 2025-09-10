@@ -10,6 +10,7 @@ import { MapPin, Phone, Clock, DollarSign, AlertCircle, Star } from 'lucide-reac
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 interface VetResultsProps {
   animal: string;
@@ -20,30 +21,30 @@ export default function VetResults({ animal }: VetResultsProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const [location] = useLocalStorage('userLocation', null);
 
   useEffect(() => {
     async function getVets() {
+      setIsLoading(true);
+      setError(null);
+
+      if (!location) {
+        setError("We couldn't access your location. Please enable location services in your browser settings and refresh the page to find nearby vets.");
+        setIsLoading(false);
+        return;
+      }
+      
+      const locationString = `${location.latitude}, ${location.longitude}`;
+
       try {
-        setIsLoading(true);
-        setError(null);
-        
-        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-            if (!navigator.geolocation) {
-                reject(new Error("Geolocation is not supported by your browser."));
-                return;
-            }
-            navigator.geolocation.getCurrentPosition(resolve, reject);
-        });
-        
-        const location = `${position.coords.latitude}, ${position.coords.longitude}`;
-        
-        const result = await findTopRatedVetsAction({ location });
+        const result = await findTopRatedVetsAction({ location: locationString });
 
         if (result.success) {
-          if (result.data && result.data.length > 0) {
+          // Handle cases where AI returns an empty array or non-array
+          if (Array.isArray(result.data) && result.data.length > 0) {
             setVets(result.data);
           } else {
-            setVets([]); // Set to empty array to indicate no results found
+            setVets([]); // Explicitly set to empty array for "No results" case
           }
         } else {
           setError(result.error);
@@ -54,12 +55,7 @@ export default function VetResults({ animal }: VetResultsProps) {
           });
         }
       } catch (e: any) {
-        let errorMessage = 'An unexpected error occurred while fetching vet data.';
-        if (e.code === 1) { // Geolocation permission denied
-            errorMessage = 'Location access is required to find nearby vets. Please enable it in your browser settings and try again.';
-        } else if (typeof e.message === 'string') {
-            errorMessage = e.message;
-        }
+        const errorMessage = e.message || 'An unexpected error occurred while fetching vet data.';
         setError(errorMessage);
         toast({
           variant: "destructive",
@@ -72,10 +68,10 @@ export default function VetResults({ animal }: VetResultsProps) {
     }
 
     getVets();
-  }, [animal, toast]);
+  }, [animal, location, toast]);
 
   if (isLoading) {
-    return <VetSkeletonLoader />;
+    return <VetSkeletonLoader animal={animal} />;
   }
 
   if (error) {
@@ -94,7 +90,7 @@ export default function VetResults({ animal }: VetResultsProps) {
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>No Vets Found</AlertTitle>
             <AlertDescription>
-                We couldn't find any veterinarians in a 200km radius for your location. You could try again later.
+                We couldn't find any veterinarians in a 200km radius of your location. You could try searching again later.
             </AlertDescription>
         </Alert>
     );
@@ -112,6 +108,7 @@ export default function VetResults({ animal }: VetResultsProps) {
                 alt={`Photo of ${vet.name}`}
                 fill
                 className="object-cover"
+                data-ai-hint="veterinarian clinic"
               />
             </div>
             <CardHeader>
@@ -130,9 +127,11 @@ export default function VetResults({ animal }: VetResultsProps) {
                     <DollarSign className="h-4 w-4 mt-1 flex-shrink-0" />
                     <span>{vet.fees}</span>
                 </div>
-                <div className="flex items-center gap-3 text-yellow-500">
-                    <Star className="h-5 w-5 fill-current" />
-                    <span className="font-bold text-base">{vet.rating ? `${vet.rating.toFixed(1)} / 5.0` : 'No rating'}</span>
+                <div className="flex items-center gap-2 text-yellow-500">
+                    {[...Array(5)].map((_, i) => (
+                        <Star key={i} className={`h-5 w-5 ${i < (vet.rating || 0) ? 'fill-current' : 'text-gray-300'}`} />
+                    ))}
+                    <span className="font-bold text-base text-muted-foreground ml-1">{vet.rating ? `${vet.rating.toFixed(1)} / 5.0` : 'No rating'}</span>
                 </div>
             </CardContent>
             <CardFooter className="bg-muted/50 p-3 grid grid-cols-2 gap-2">
@@ -160,12 +159,12 @@ export default function VetResults({ animal }: VetResultsProps) {
   );
 }
 
-const VetSkeletonLoader = () => (
-    <div className="space-y-6">
-        <h2 className="text-3xl font-bold font-headline text-center">
-            <Skeleton className="h-8 w-96 mx-auto mb-2" />
-            <Skeleton className="h-6 w-80 mx-auto" />
-        </h2>
+const VetSkeletonLoader = ({ animal }: { animal: string }) => (
+    <div className="space-y-6 animate-pulse">
+        <div className='text-center'>
+            <Skeleton className="h-8 w-80 mx-auto mb-2" />
+            <Skeleton className="h-6 w-64 mx-auto" />
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(3)].map((_, i) => (
                 <Card key={i} className="flex flex-col overflow-hidden rounded-lg">
@@ -187,4 +186,4 @@ const VetSkeletonLoader = () => (
             ))}
         </div>
     </div>
-)
+);
