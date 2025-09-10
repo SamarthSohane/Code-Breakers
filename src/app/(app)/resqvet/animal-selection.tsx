@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { animals } from '@/lib/animals';
 import { cn } from '@/lib/utils';
-import { PawPrint } from 'lucide-react';
 
 export default function AnimalSelection() {
   const [selectedAnimal, setSelectedAnimal] = useState<string | null>(null);
@@ -17,9 +16,9 @@ export default function AnimalSelection() {
         <CardContent className="p-2">
           <ScrollArea className="h-96 w-full">
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 p-4">
-              {animals.map((animal) => (
+              {animals.map((animal, index) => (
                 <div
-                  key={animal.name}
+                  key={`${animal.name}-${index}`}
                   className={cn(
                     'flex flex-col items-center justify-center p-3 rounded-lg border-2 cursor-pointer transition-all duration-200',
                     selectedAnimal === animal.name
