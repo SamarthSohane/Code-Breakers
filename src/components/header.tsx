@@ -1,9 +1,22 @@
+'use client';
+
 import Link from 'next/link';
 import { Logo } from '@/components/icons/logo';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from './ui/button';
+import { useLocalStorage } from '@/hooks/use-local-storage';
+import { useEffect, useState } from 'react';
 
 export default function Header() {
+  const [name] = useLocalStorage('userName', '');
+  const [initial, setInitial] = useState('U');
+
+  useEffect(() => {
+    if (name && typeof name === 'string' && name.length > 0) {
+      setInitial(name.charAt(0).toUpperCase());
+    }
+  }, [name]);
+
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
@@ -15,7 +28,7 @@ export default function Header() {
         <div className="flex flex-1 items-center justify-end space-x-4">
            <Avatar>
             <AvatarImage src="https://picsum.photos/seed/user-avatar/100/100" data-ai-hint="user avatar" />
-            <AvatarFallback>U</AvatarFallback>
+            <AvatarFallback>{initial}</AvatarFallback>
           </Avatar>
         </div>
       </div>
