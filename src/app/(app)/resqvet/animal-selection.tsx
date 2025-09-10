@@ -20,9 +20,9 @@ export default function AnimalSelection() {
                 <div
                   key={`${animal.name}-${index}`}
                   className={cn(
-                    'flex flex-col items-center justify-center p-3 rounded-lg border-2 cursor-pointer transition-all duration-200',
+                    'flex flex-col items-center justify-center p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:scale-110',
                     selectedAnimal === animal.name
-                      ? 'border-primary bg-primary/10'
+                      ? 'border-primary bg-primary/10 scale-110'
                       : 'border-transparent hover:border-primary/50 hover:bg-accent/50'
                   )}
                   onClick={() => setSelectedAnimal(animal.name)}
