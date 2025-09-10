@@ -16,7 +16,7 @@ interface VetResultsProps {
 }
 
 export default function VetResults({ animal }: VetResultsProps) {
-  const [vets, setVets] = useState<FindTopRatedVetsOutput>([]);
+  const [vets, setVets] = useState<FindTopRatedVetsOutput | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -80,7 +80,7 @@ export default function VetResults({ animal }: VetResultsProps) {
     );
   }
 
-  if (vets.length === 0) {
+  if (!vets || vets.length === 0) {
     return (
         <div className="text-center text-muted-foreground">
             <p>No veterinarians found for your location.</p>
