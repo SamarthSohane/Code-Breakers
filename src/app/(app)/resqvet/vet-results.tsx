@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -23,7 +24,7 @@ export default function VetResults({ animal }: VetResultsProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const [userStoredLocation] = useLocalStorage<{latitude: number; longitude: number} | null>('userLocation', null);
+  const [userStoredLocation, setUserStoredLocation] = useLocalStorage<{latitude: number; longitude: number} | null>('userLocation', null);
 
   const userLocation = useMemo(() => {
     if (userStoredLocation) {
@@ -33,50 +34,54 @@ export default function VetResults({ animal }: VetResultsProps) {
   }, [userStoredLocation]);
 
   useEffect(() => {
-    if (!userLocation) {
-      setError("We couldn't access your location. Please ensure location was enabled during onboarding.");
-      setIsLoading(false);
-      return;
-    }
-
-    const locationString = `${userLocation.lat}, ${userLocation.lng}`;
-    getVets(locationString);
-
-    async function getVets(location: string) {
+    
+    const getLocationAndFetchVets = async () => {
       setIsLoading(true);
       setError(null);
-      
-      try {
-        const result = await findTopRatedVetsAction({ location });
 
-        if (result.success) {
-          if (Array.isArray(result.data) && result.data.length > 0) {
-            setVets(result.data);
+      const fetchVets = async (lat: number, lng: number) => {
+        const locationString = `${lat}, ${lng}`;
+        try {
+          const result = await findTopRatedVetsAction({ location: locationString });
+          if (result.success) {
+            setVets(Array.isArray(result.data) ? result.data : []);
           } else {
-            setVets([]);
+            setError(result.error);
+            toast({ variant: "destructive", title: "Error finding vets", description: result.error });
           }
-        } else {
-          setError(result.error);
-          toast({
-            variant: "destructive",
-            title: "Error finding vets",
-            description: result.error,
-          });
+        } catch (e: any) {
+          const errorMessage = e.message || 'An unexpected error occurred while fetching vet data.';
+          setError(errorMessage);
+          toast({ variant: "destructive", title: "Error", description: errorMessage });
+        } finally {
+          setIsLoading(false);
         }
-      } catch (e: any) {
-        const errorMessage = e.message || 'An unexpected error occurred while fetching vet data.';
-        setError(errorMessage);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: errorMessage,
-        });
-      } finally {
+      };
+
+      if (userStoredLocation) {
+        fetchVets(userStoredLocation.latitude, userStoredLocation.longitude);
+      } else if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            setUserStoredLocation({ latitude, longitude });
+            fetchVets(latitude, longitude);
+          },
+          () => {
+            setError("We couldn't access your location. Please enable location permissions in your browser settings to find nearby vets.");
+            setIsLoading(false);
+          },
+          { timeout: 10000 }
+        );
+      } else {
+        setError("Geolocation is not supported by this browser.");
         setIsLoading(false);
       }
-    }
+    };
+
+    getLocationAndFetchVets();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [animal, toast, userLocation]);
+  }, [animal, toast]);
 
   if (isLoading) {
     return <VetSkeletonLoader animal={animal} />;
