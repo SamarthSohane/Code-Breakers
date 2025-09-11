@@ -18,8 +18,8 @@ export const Logo = ({
     <div className={cn('font-headline font-bold text-primary', className)}>
       <div className={cn('inline-flex items-center gap-2', size)}>
         <PawPrint className={cn("text-accent", paw1Class)} />
-        <span className={textClass}>ResQPet</span>
         <PawPrint className={cn("text-accent", paw2Class)} />
+        <span className={textClass}>ResQPet</span>
       </div>
     </div>
   );
