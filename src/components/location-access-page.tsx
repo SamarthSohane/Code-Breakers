@@ -13,7 +13,7 @@ export default function LocationAccessPage({ onLocationSuccess, onLocationError 
   
   const handleLocationRequest = () => {
     if (!navigator.geolocation) {
-      onLocationError(); // Geolocation not supported
+      onLocationError(); // Geolocation not supported, but we proceed
       return;
     }
 
@@ -22,16 +22,12 @@ export default function LocationAccessPage({ onLocationSuccess, onLocationError 
         onLocationSuccess(position);
       },
       () => {
-        // Handle error or denial. The parent component decides what to do.
+        // Handle error or denial. The parent component decides what to do, which is to proceed.
         onLocationError();
       },
       { timeout: 10000 } // Add a timeout to avoid getting stuck
     );
   };
-
-  const handleSkip = () => {
-    onLocationError();
-  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4 animate-fade-in">
@@ -40,15 +36,15 @@ export default function LocationAccessPage({ onLocationSuccess, onLocationError 
                 <div className="flex justify-center mb-4">
                     <MapPin className="w-12 h-12 text-primary" />
                 </div>
-                <CardTitle>Location Access</CardTitle>
-                <CardDescription>To find the best local vets and shelters, please allow access to your location.</CardDescription>
+                <CardTitle>One Last Step: Location</CardTitle>
+                <CardDescription>To find the best local vets and shelters, please allow access to your location. This is optional and you can proceed without it.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
                 <Button onClick={handleLocationRequest} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
                     Allow Location Access
                 </Button>
-                <Button onClick={handleSkip} className="w-full" variant="ghost">
-                    Skip for now
+                <Button onClick={onLocationError} className="w-full" variant="ghost">
+                    Maybe Later
                 </Button>
             </CardContent>
         </Card>

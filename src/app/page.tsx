@@ -13,12 +13,13 @@ export default function Home() {
   const [view, setView] = useState<View>('splash');
   const router = useRouter();
   const [name, setName] = useLocalStorage('userName', '');
-  const [location, setLocation] = useLocalStorage('userLocation', null);
+  // Using a separate flag to know if onboarding is complete, location can be null
+  const [onboardingComplete, setOnboardingComplete] = useLocalStorage('onboardingComplete', false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       // If the user has completed onboarding before, go to dashboard
-      if (name && location) {
+      if (onboardingComplete) {
         router.push('/dashboard');
       } else {
         // Otherwise, start the onboarding flow from the authentication step
@@ -39,17 +40,19 @@ export default function Home() {
   };
 
   const handleLocationSuccess = (position?: GeolocationPosition) => {
-    if (position) {
-      setLocation({
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-      });
+     if (position) {
+      // It's okay if window is not available during SSR.
+      try {
+        localStorage.setItem('userLocation', JSON.stringify({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        }));
+      } catch (error) {
+        console.log(error);
+      }
     }
-     router.push('/dashboard');
-  };
-
-  const handleLocationError = () => {
-    // If location fails or is skipped, still proceed to dashboard
+    // Mark onboarding as complete and proceed to dashboard
+    setOnboardingComplete(true);
     router.push('/dashboard');
   };
 
@@ -58,7 +61,7 @@ export default function Home() {
       case 'auth':
         return <AuthPage onAuthSuccess={handleAuthSuccess} />;
       case 'location':
-        return <LocationAccessPage onLocationSuccess={handleLocationSuccess} onLocationError={handleLocationError} />;
+        return <LocationAccessPage onLocationSuccess={handleLocationSuccess} onLocationError={handleLocationSuccess} />; // Always proceed after location step
       default:
         // Render nothing during the splash screen phase, as it's an overlay
         return null; 
