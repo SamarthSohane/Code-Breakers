@@ -14,6 +14,7 @@ const FindTopRatedVetsInputSchema = z.object({
   location: z
     .string()
     .describe('The user provided location to search for veterinarians near.'),
+  animal: z.string().describe('The type of animal the user needs a vet for.'),
 });
 export type FindTopRatedVetsInput = z.infer<typeof FindTopRatedVetsInputSchema>;
 
@@ -39,7 +40,7 @@ const prompt = ai.definePrompt({
   name: 'findTopRatedVetsPrompt',
   input: {schema: FindTopRatedVetsInputSchema},
   output: {schema: FindTopRatedVetsOutputSchema},
-  prompt: `You are a helpful AI assistant. Find the top-rated veterinarians near the user's location within a 200km radius. Return a list of vets including their name, address, rating, phone number, distance from user, consultation fees, opening and closing hours, and a representative image URL for the clinic.\n\nLocation: {{{location}}}`,
+  prompt: `You are a helpful AI assistant. Find the top-rated veterinarians for a {{{animal}}} near the user's location within a 200km radius. Return a list of vets including their name, address, rating, phone number, distance from user, consultation fees, opening and closing hours, and a representative image URL for the clinic.\n\nLocation: {{{location}}}`,
 });
 
 const findTopRatedVetsFlow = ai.defineFlow(

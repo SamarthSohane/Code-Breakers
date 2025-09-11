@@ -5,6 +5,7 @@ import { z } from 'zod';
 
 const FindVetsInputSchema = z.object({
   location: z.string(),
+  animal: z.string(),
 });
 
 type ServerActionResult<T> = 

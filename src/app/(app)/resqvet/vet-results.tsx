@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { findTopRatedVetsAction } from './actions';
 import type { FindTopRatedVetsOutput } from '@/ai/flows/find-top-rated-vets';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -14,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import VetMap from './vet-map';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+import { cn } from '@/lib/utils';
 
 interface VetResultsProps {
   animal: string;
@@ -24,7 +24,10 @@ export default function VetResults({ animal }: VetResultsProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const [userStoredLocation, setUserStoredLocation] = useLocalStorage<{latitude: number; longitude: number} | null>('userLocation', null);
+  const [userStoredLocation] = useLocalStorage<{latitude: number; longitude: number} | null>('userLocation', null);
+  const [selectedVet, setSelectedVet] = useState<number | null>(null);
+  const vetCardRefs = useRef<(HTMLDivElement | null)[]>([]);
+
 
   const userLocation = useMemo(() => {
     if (userStoredLocation) {
@@ -42,9 +45,11 @@ export default function VetResults({ animal }: VetResultsProps) {
       const fetchVets = async (lat: number, lng: number) => {
         const locationString = `${lat}, ${lng}`;
         try {
-          const result = await findTopRatedVetsAction({ location: locationString });
+          const result = await findTopRatedVetsAction({ location: locationString, animal });
           if (result.success) {
-            setVets(Array.isArray(result.data) ? result.data : []);
+            const vetData = Array.isArray(result.data) ? result.data : [];
+            setVets(vetData);
+            vetCardRefs.current = vetCardRefs.current.slice(0, vetData.length);
           } else {
             setError(result.error);
             toast({ variant: "destructive", title: "Error finding vets", description: result.error });
@@ -64,7 +69,7 @@ export default function VetResults({ animal }: VetResultsProps) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
             const { latitude, longitude } = position.coords;
-            setUserStoredLocation({ latitude, longitude });
+            // The useLocalStorage hook can't be used here to set, but we can use the location for this session
             fetchVets(latitude, longitude);
           },
           () => {
@@ -82,6 +87,14 @@ export default function VetResults({ animal }: VetResultsProps) {
     getLocationAndFetchVets();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [animal, toast]);
+
+  const handleVetSelection = (index: number) => {
+    setSelectedVet(index);
+    vetCardRefs.current[index]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+    });
+  }
 
   if (isLoading) {
     return <VetSkeletonLoader animal={animal} />;
@@ -102,7 +115,7 @@ export default function VetResults({ animal }: VetResultsProps) {
       <Alert variant="destructive" className="max-w-2xl mx-auto">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Location not found</AlertTitle>
-        <AlertDescription>We need your location to find nearby vets. Please restart the app and allow location access.</AlertDescription>
+        <AlertDescription>We need your location to find nearby vets. Please allow location access.</AlertDescription>
       </Alert>
     );
   }
@@ -113,7 +126,7 @@ export default function VetResults({ animal }: VetResultsProps) {
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>No Vets Found</AlertTitle>
             <AlertDescription>
-                We couldn't find any veterinarians in a 200km radius of your location. You could try searching again later.
+                We couldn't find any veterinarians specializing in {animal}s within a 200km radius. You could try searching again later.
             </AlertDescription>
         </Alert>
     );
@@ -124,12 +137,25 @@ export default function VetResults({ animal }: VetResultsProps) {
       <h2 className="text-3xl font-bold font-headline text-center">Top Vets for {animal}s Near You</h2>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[70vh]">
          <div className="relative">
-            <VetMap vets={vets} userLocation={userLocation} />
+            <VetMap 
+              vets={vets} 
+              userLocation={userLocation} 
+              selectedVet={selectedVet}
+              onMarkerClick={handleVetSelection}
+            />
          </div>
          <ScrollArea className="h-full">
             <div className="space-y-4 pr-4">
                 {vets.map((vet, index) => (
-                <Card key={index} className="flex flex-col overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <Card 
+                    key={index} 
+                    ref={el => vetCardRefs.current[index] = el}
+                    className={cn(
+                        "flex flex-col overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer",
+                        selectedVet === index ? 'border-primary ring-2 ring-primary' : 'border-border'
+                    )}
+                    onClick={() => handleVetSelection(index)}
+                >
                     <div className="relative h-40 w-full">
                     <Image
                         src={vet.image || `https://picsum.photos/seed/vet${index}/600/400`}
@@ -163,13 +189,13 @@ export default function VetResults({ animal }: VetResultsProps) {
                         </div>
                     </CardContent>
                     <CardFooter className="bg-muted/50 p-3 grid grid-cols-2 gap-2">
-                        <Button asChild variant="outline" size="sm">
+                        <Button asChild variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
                             <a href={`tel:${vet.phone_number}`}>
                                 <Phone />
                                 Call
                             </a>
                         </Button>
-                        <Button asChild variant="outline" size="sm">
+                        <Button asChild variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
                             <a 
                                 href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(vet.address)}`}
                                 target="_blank"
