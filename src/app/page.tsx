@@ -8,7 +8,7 @@ import LocationAccessPage from '@/components/location-access-page';
 import NameInputPage from '@/components/name-input-page';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 
-type View = 'splash' | 'location' | 'auth' | 'nameInput' | 'denied';
+type View = 'splash' | 'auth' | 'location' | 'nameInput';
 
 export default function Home() {
   const [view, setView] = useState<View>('splash');
@@ -18,34 +18,34 @@ export default function Home() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      // If we already have location, skip to auth.
-      if (location) {
-        setView('auth');
-      } else if (navigator.geolocation) {
-        // Otherwise, ask for it.
-        setView('location');
+      // Start with authentication
+      if (name && location) {
+        router.push('/dashboard');
       } else {
-        // If geolocation is not supported, go to auth but some features might be limited.
         setView('auth');
       }
-    }, 3000); // Reduced splash time
+    }, 3000); 
     return () => clearTimeout(timer);
-  }, [location]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const handleLocationSuccess = (position: GeolocationPosition) => {
-    setLocation({
-      latitude: position.coords.latitude,
-      longitude: position.coords.longitude,
-    });
-    setView('auth');
-  };
-
-  const handleLocationError = () => {
-    // Silently proceed to auth, features requiring location will be handled in-app.
-    setView('auth');
-  };
-  
   const handleAuthSuccess = () => {
+    // After auth, ask for location if we don't have it
+    if (location) {
+      handleLocationSuccess();
+    } else {
+      setView('location');
+    }
+  };
+
+  const handleLocationSuccess = (position?: GeolocationPosition) => {
+    if (position) {
+      setLocation({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      });
+    }
+    // After location, ask for name if we don't have it
     if (name) {
       router.push('/dashboard');
     } else {
@@ -53,6 +53,15 @@ export default function Home() {
     }
   };
 
+  const handleLocationError = () => {
+    // If location fails, proceed to name input
+    if (name) {
+      router.push('/dashboard');
+    } else {
+      setView('nameInput');
+    }
+  };
+  
   const handleNameSubmit = (newName: string) => {
     setName(newName);
     router.push('/dashboard');
@@ -60,10 +69,10 @@ export default function Home() {
 
   const renderView = () => {
     switch (view) {
-      case 'location':
-        return <LocationAccessPage onLocationSuccess={handleLocationSuccess} onLocationError={handleLocationError} />;
       case 'auth':
         return <AuthPage onAuthSuccess={handleAuthSuccess} />;
+      case 'location':
+        return <LocationAccessPage onLocationSuccess={handleLocationSuccess} onLocationError={handleLocationError} />;
       case 'nameInput':
         return <NameInputPage onNameSubmit={handleNameSubmit} />;
       default:
