@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { findTopRatedVetsAction } from './actions';
 import type { FindTopRatedVetsOutput } from '@/ai/flows/find-top-rated-vets';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -126,7 +126,7 @@ export default function VetResults({ animal }: VetResultsProps) {
                 >
                     <div className="relative h-40 w-full">
                     <Image
-                        src={vet.image || `https://picsum.photos/seed/vet${index}/600/400`}
+                        src={vet.image.startsWith('http') ? vet.image : `https://picsum.photos/seed/vet${index}/600/400`}
                         alt={`Photo of ${vet.name}`}
                         fill
                         className="object-cover"
