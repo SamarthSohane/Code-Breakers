@@ -10,41 +10,54 @@ import { MapPin, Phone, Clock, DollarSign, AlertCircle, Star } from 'lucide-reac
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { useLocalStorage } from '@/hooks/use-local-storage';
 
 interface VetResultsProps {
   animal: string;
 }
 
+type GeolocationState = 'pending' | 'success' | 'error';
+
 export default function VetResults({ animal }: VetResultsProps) {
   const [vets, setVets] = useState<FindTopRatedVetsOutput | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [locationState, setLocationState] = useState<GeolocationState>('pending');
   const { toast } = useToast();
-  const [location] = useLocalStorage('userLocation', null);
 
   useEffect(() => {
-    async function getVets() {
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by your browser. We can't find nearby vets without it.");
+      setLocationState('error');
+      setIsLoading(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocationState('success');
+        const locationString = `${position.coords.latitude}, ${position.coords.longitude}`;
+        getVets(locationString);
+      },
+      () => {
+        setError("We couldn't access your location. Please enable location services in your browser settings and refresh the page to find nearby vets.");
+        setLocationState('error');
+        setIsLoading(false);
+      },
+      { timeout: 10000 }
+    );
+
+    async function getVets(location: string) {
       setIsLoading(true);
       setError(null);
-
-      if (!location) {
-        setError("We couldn't access your location. Please enable location services in your browser settings and refresh the page to find nearby vets.");
-        setIsLoading(false);
-        return;
-      }
       
-      const locationString = `${location.latitude}, ${location.longitude}`;
-
       try {
-        const result = await findTopRatedVetsAction({ location: locationString });
+        const result = await findTopRatedVetsAction({ location });
 
         if (result.success) {
-          // Handle cases where AI returns an empty array or non-array
           if (Array.isArray(result.data) && result.data.length > 0) {
             setVets(result.data);
           } else {
-            setVets([]); // Explicitly set to empty array for "No results" case
+            setVets([]);
           }
         } else {
           setError(result.error);
@@ -66,11 +79,10 @@ export default function VetResults({ animal }: VetResultsProps) {
         setIsLoading(false);
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [animal, toast]);
 
-    getVets();
-  }, [animal, location, toast]);
-
-  if (isLoading) {
+  if (isLoading || locationState === 'pending') {
     return <VetSkeletonLoader animal={animal} />;
   }
 
@@ -162,8 +174,7 @@ export default function VetResults({ animal }: VetResultsProps) {
 const VetSkeletonLoader = ({ animal }: { animal: string }) => (
     <div className="space-y-6 animate-pulse">
         <div className='text-center'>
-            <Skeleton className="h-8 w-80 mx-auto mb-2" />
-            <Skeleton className="h-6 w-64 mx-auto" />
+            <Skeleton className="h-8 w-80 mx-auto mb-4" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(3)].map((_, i) => (
