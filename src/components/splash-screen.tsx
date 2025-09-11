@@ -11,9 +11,14 @@ export default function SplashScreen({ isVisible }: { isVisible: boolean }) {
         isVisible ? "opacity-100" : "opacity-0 pointer-events-none"
       )}
     >
-      <div className="animate-scale-in animate-fade-in">
-        <Logo size="text-7xl md:text-8xl" />
-        <p className="mt-4 text-center text-lg text-muted-foreground font-headline">
+      <div className="animate-logo-in">
+        <Logo
+          size="text-8xl md:text-9xl"
+          paw1Class="animate-paw-in-left"
+          paw2Class="animate-paw-in-right"
+          textClass="animate-text-fade-in"
+        />
+        <p className="mt-4 text-center text-lg text-muted-foreground font-headline animate-text-fade-in">
           Rescue made simple, Care made sure.
         </p>
       </div>

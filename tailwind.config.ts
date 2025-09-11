@@ -89,6 +89,26 @@ export default {
         'scale-in': {
             from: { transform: 'scale(0.9)' },
             to: { transform: 'scale(1)' },
+        },
+        'paw-in-left': {
+          '0%': { transform: 'translateX(-200%) scale(0.5)', opacity: '0' },
+          '60%': { transform: 'translateX(0) scale(1.2)', opacity: '1' },
+          '80%': { transform: 'scale(0.95)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        'paw-in-right': {
+          '0%': { transform: 'translateX(200%) scale(0.5)', opacity: '0' },
+          '60%': { transform: 'translateX(0) scale(1.2)', opacity: '1' },
+          '80%': { transform: 'scale(0.95)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        'text-fade-in': {
+          '0%, 50%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'logo-in': {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.02)' },
         }
       },
       animation: {
@@ -97,6 +117,10 @@ export default {
         'fade-in': 'fade-in 1s ease-in-out',
         'fade-out': 'fade-out 1s ease-in-out forwards',
         'scale-in': 'scale-in 1s cubic-bezier(0.25, 1, 0.5, 1)',
+        'paw-in-left': 'paw-in-left 1s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards',
+        'paw-in-right': 'paw-in-right 1s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards',
+        'text-fade-in': 'text-fade-in 2s ease-out forwards',
+        'logo-in': 'logo-in 4s ease-in-out infinite 1.5s',
       },
     },
   },
