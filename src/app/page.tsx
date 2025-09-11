@@ -5,10 +5,9 @@ import { useRouter } from 'next/navigation';
 import SplashScreen from '@/components/splash-screen';
 import AuthPage from '@/components/auth-page';
 import LocationAccessPage from '@/components/location-access-page';
-import NameInputPage from '@/components/name-input-page';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 
-type View = 'splash' | 'auth' | 'location' | 'nameInput';
+type View = 'splash' | 'auth' | 'location';
 
 export default function Home() {
   const [view, setView] = useState<View>('splash');
@@ -30,7 +29,11 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleAuthSuccess = () => {
+  const handleAuthSuccess = (userName?: string) => {
+    // If a name is provided from the signup form, save it.
+    if (userName) {
+      setName(userName);
+    }
     // After auth, ask for location
     setView('location');
   };
@@ -42,19 +45,13 @@ export default function Home() {
         longitude: position.coords.longitude,
       });
     }
-    // After location, ask for name
-    setView('nameInput');
+     router.push('/dashboard');
   };
 
   const handleLocationError = () => {
-    // If location fails or is skipped, still proceed to name input
-    setView('nameInput');
-  };
-  
-  const handleNameSubmit = (newName: string) => {
-    setName(newName);
+    // If location fails or is skipped, still proceed to dashboard
     router.push('/dashboard');
-  }
+  };
 
   const renderView = () => {
     switch (view) {
@@ -62,8 +59,6 @@ export default function Home() {
         return <AuthPage onAuthSuccess={handleAuthSuccess} />;
       case 'location':
         return <LocationAccessPage onLocationSuccess={handleLocationSuccess} onLocationError={handleLocationError} />;
-      case 'nameInput':
-        return <NameInputPage onNameSubmit={handleNameSubmit} />;
       default:
         // Render nothing during the splash screen phase, as it's an overlay
         return null; 

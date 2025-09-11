@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,13 +9,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Logo } from './icons/logo';
 
 interface AuthPageProps {
-  onAuthSuccess: () => void;
+  onAuthSuccess: (name?: string) => void;
 }
 
 export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
-  const handleSubmit = (e: React.FormEvent) => {
+  const [name, setName] = useState('');
+
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     onAuthSuccess();
+  };
+
+  const handleSignup = (e: React.FormEvent) => {
+    e.preventDefault();
+    onAuthSuccess(name);
   };
 
   return (
@@ -33,7 +41,7 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
                 <CardDescription>Enter your credentials to access your account.</CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleLogin}>
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="login-email">Email</Label>
@@ -58,8 +66,12 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
                 <CardDescription>Join our community to help pets in need.</CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSignup}>
                   <div className="space-y-4">
+                     <div className="space-y-2">
+                      <Label htmlFor="signup-name">Name</Label>
+                      <Input id="signup-name" type="text" placeholder="John Doe" required value={name} onChange={(e) => setName(e.target.value)} />
+                    </div>
                     <div className="space-y-2">
                       <Label htmlFor="signup-email">Email</Label>
                       <Input id="signup-email" type="email" placeholder="m@example.com" required />
