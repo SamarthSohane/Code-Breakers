@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import VetMap from './vet-map';
-import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn } from '@/lib/utils';
 
 interface VetResultsProps {
@@ -24,64 +23,69 @@ export default function VetResults({ animal }: VetResultsProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const [userStoredLocation] = useLocalStorage<{latitude: number; longitude: number} | null>('userLocation', null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedVet, setSelectedVet] = useState<number | null>(null);
   const vetCardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-
-  const userLocation = useMemo(() => {
-    if (userStoredLocation) {
-        return { lat: userStoredLocation.latitude, lng: userStoredLocation.longitude };
-    }
-    return null;
-  }, [userStoredLocation]);
-
   useEffect(() => {
-    
-    const getLocationAndFetchVets = async () => {
+    const getLocationAndFetchVets = () => {
       setIsLoading(true);
       setError(null);
 
-      const fetchVets = async (lat: number, lng: number) => {
-        const locationString = `${lat}, ${lng}`;
-        try {
-          const result = await findTopRatedVetsAction({ location: locationString, animal });
-          if (result.success) {
-            const vetData = Array.isArray(result.data) ? result.data : [];
-            setVets(vetData);
-            vetCardRefs.current = vetCardRefs.current.slice(0, vetData.length);
-          } else {
-            setError(result.error);
-            toast({ variant: "destructive", title: "Error finding vets", description: result.error });
-          }
-        } catch (e: any) {
-          const errorMessage = e.message || 'An unexpected error occurred while fetching vet data.';
-          setError(errorMessage);
-          toast({ variant: "destructive", title: "Error", description: errorMessage });
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      if (userStoredLocation) {
-        fetchVets(userStoredLocation.latitude, userStoredLocation.longitude);
-      } else if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const { latitude, longitude } = position.coords;
-            // The useLocalStorage hook can't be used here to set, but we can use the location for this session
-            fetchVets(latitude, longitude);
-          },
-          () => {
-            setError("We couldn't access your location. Please enable location permissions in your browser settings to find nearby vets.");
-            setIsLoading(false);
-          },
-          { timeout: 10000 }
-        );
-      } else {
-        setError("Geolocation is not supported by this browser.");
+      if (!navigator.geolocation) {
+        setError("Geolocation is not supported by your browser. We can't find vets without your location.");
         setIsLoading(false);
+        return;
       }
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ lat: latitude, lng: longitude });
+          const locationString = `${latitude}, ${longitude}`;
+
+          try {
+            const result = await findTopRatedVetsAction({ location: locationString, animal });
+            if (result.success) {
+              const vetData = Array.isArray(result.data) ? result.data : [];
+               if (vetData.length === 0) {
+                setVets([]);
+                setError(`We couldn't find any veterinarians specializing in ${animal}s near you. You could try searching again later.`);
+              } else {
+                setVets(vetData);
+                vetCardRefs.current = new Array(vetData.length).fill(null);
+              }
+            } else {
+              setError(result.error);
+              toast({ variant: "destructive", title: "Error finding vets", description: result.error });
+            }
+          } catch (e: any) {
+            const errorMessage = e.message || 'An unexpected error occurred while fetching vet data.';
+            setError(errorMessage);
+            toast({ variant: "destructive", title: "Error", description: errorMessage });
+          } finally {
+            setIsLoading(false);
+          }
+        },
+        (geoError) => {
+          switch(geoError.code) {
+            case geoError.PERMISSION_DENIED:
+              setError("Location access was denied. Please allow location access in your browser settings to find nearby vets.");
+              break;
+            case geoError.POSITION_UNAVAILABLE:
+              setError("Your location information is unavailable. Please check your device's location services.");
+              break;
+            case geoError.TIMEOUT:
+              setError("The request to get your location timed out. Please try again.");
+              break;
+            default:
+              setError("An unknown error occurred while trying to get your location.");
+              break;
+          }
+          setIsLoading(false);
+        },
+        { timeout: 10000, enableHighAccuracy: true }
+      );
     };
 
     getLocationAndFetchVets();
@@ -100,7 +104,7 @@ export default function VetResults({ animal }: VetResultsProps) {
     return <VetSkeletonLoader animal={animal} />;
   }
 
-  if (error) {
+  if (error && (!vets || vets.length === 0)) {
     return (
       <Alert variant="destructive" className="max-w-2xl mx-auto">
         <AlertCircle className="h-4 w-4" />
@@ -115,7 +119,7 @@ export default function VetResults({ animal }: VetResultsProps) {
       <Alert variant="destructive" className="max-w-2xl mx-auto">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Location not found</AlertTitle>
-        <AlertDescription>We need your location to find nearby vets. Please allow location access.</AlertDescription>
+        <AlertDescription>We need your location to find nearby vets. Please allow location access and try again.</AlertDescription>
       </Alert>
     );
   }
@@ -131,6 +135,7 @@ export default function VetResults({ animal }: VetResultsProps) {
         </Alert>
     );
   }
+
 
   return (
     <div className="space-y-4">
