@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Logo } from '@/components/icons/logo';
+import { Logo } from '@/components/icons/logo-client';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useEffect, useState } from 'react';

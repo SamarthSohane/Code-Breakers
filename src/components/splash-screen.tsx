@@ -1,6 +1,6 @@
 'use client';
 
-import { Logo } from '@/components/icons/logo';
+import { Logo } from '@/components/icons/logo-client';
 import { cn } from '@/lib/utils';
 
 export default function SplashScreen({ isVisible }: { isVisible: boolean }) {
