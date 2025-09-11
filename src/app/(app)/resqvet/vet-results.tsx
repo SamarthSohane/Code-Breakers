@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { findTopRatedVetsAction } from './actions';
 import type { FindTopRatedVetsOutput } from '@/ai/flows/find-top-rated-vets';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -11,7 +11,6 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import VetMap from './vet-map';
 import { cn } from '@/lib/utils';
 
 interface VetResultsProps {
@@ -23,10 +22,7 @@ export default function VetResults({ animal }: VetResultsProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [selectedVet, setSelectedVet] = useState<number | null>(null);
-  const vetCardRefs = useRef<(HTMLDivElement | null)[]>([]);
-
+  
   useEffect(() => {
     const getLocationAndFetchVets = () => {
       setIsLoading(true);
@@ -41,7 +37,6 @@ export default function VetResults({ animal }: VetResultsProps) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
-          setUserLocation({ lat: latitude, lng: longitude });
           const locationString = `${latitude}, ${longitude}`;
 
           try {
@@ -53,7 +48,6 @@ export default function VetResults({ animal }: VetResultsProps) {
                 setError(`We couldn't find any veterinarians specializing in ${animal}s near you. You could try searching again later.`);
               } else {
                 setVets(vetData);
-                vetCardRefs.current = new Array(vetData.length).fill(null);
               }
             } else {
               setError(result.error);
@@ -92,14 +86,6 @@ export default function VetResults({ animal }: VetResultsProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [animal, toast]);
 
-  const handleVetSelection = (index: number) => {
-    setSelectedVet(index);
-    vetCardRefs.current[index]?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-    });
-  }
-
   if (isLoading) {
     return <VetSkeletonLoader animal={animal} />;
   }
@@ -110,16 +96,6 @@ export default function VetResults({ animal }: VetResultsProps) {
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>{error}</AlertDescription>
-      </Alert>
-    );
-  }
-  
-  if (!userLocation) {
-     return (
-      <Alert variant="destructive" className="max-w-2xl mx-auto">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Location not found</AlertTitle>
-        <AlertDescription>We need your location to find nearby vets. Please allow location access and try again.</AlertDescription>
       </Alert>
     );
   }
@@ -140,26 +116,13 @@ export default function VetResults({ animal }: VetResultsProps) {
   return (
     <div className="space-y-4">
       <h2 className="text-3xl font-bold font-headline text-center">Top Vets for {animal}s Near You</h2>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[70vh]">
-         <div className="relative">
-            <VetMap 
-              vets={vets} 
-              userLocation={userLocation} 
-              selectedVet={selectedVet}
-              onMarkerClick={handleVetSelection}
-            />
-         </div>
-         <ScrollArea className="h-full">
-            <div className="space-y-4 pr-4">
+      <div className="max-w-4xl mx-auto">
+         <ScrollArea className="h-[70vh]">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pr-4">
                 {vets.map((vet, index) => (
                 <Card 
                     key={index} 
-                    ref={el => vetCardRefs.current[index] = el}
-                    className={cn(
-                        "flex flex-col overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer",
-                        selectedVet === index ? 'border-primary ring-2 ring-primary' : 'border-border'
-                    )}
-                    onClick={() => handleVetSelection(index)}
+                    className={cn("flex flex-col overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300")}
                 >
                     <div className="relative h-40 w-full">
                     <Image
@@ -225,23 +188,20 @@ const VetSkeletonLoader = ({ animal }: { animal: string }) => (
         <div className='text-center'>
             <Skeleton className="h-8 w-80 mx-auto mb-4" />
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[70vh]">
-            <Skeleton className="h-full w-full rounded-lg" />
-            <div className="space-y-4">
-                {[...Array(2)].map((_, i) => (
-                    <Card key={i} className="flex flex-col overflow-hidden rounded-lg">
-                        <Skeleton className="h-40 w-full" />
-                        <CardHeader>
-                            <Skeleton className="h-6 w-3/4" />
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <Skeleton className="h-4 w-full" />
-                            <Skeleton className="h-4 w-5/6" />
-                            <Skeleton className="h-4 w-full" />
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {[...Array(4)].map((_, i) => (
+                <Card key={i} className="flex flex-col overflow-hidden rounded-lg">
+                    <Skeleton className="h-40 w-full" />
+                    <CardHeader>
+                        <Skeleton className="h-6 w-3/4" />
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-5/6" />
+                        <Skeleton className="h-4 w-full" />
+                    </CardContent>
+                </Card>
+            ))}
         </div>
     </div>
 );
