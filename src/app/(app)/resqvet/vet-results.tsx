@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { findTopRatedVetsAction } from './actions';
 import type { FindTopRatedVetsOutput } from '@/ai/flows/find-top-rated-vets';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -10,41 +10,37 @@ import { MapPin, Phone, Clock, DollarSign, AlertCircle, Star } from 'lucide-reac
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import VetMap from './vet-map';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 interface VetResultsProps {
   animal: string;
 }
 
-type GeolocationState = 'pending' | 'success' | 'error';
-
 export default function VetResults({ animal }: VetResultsProps) {
   const [vets, setVets] = useState<FindTopRatedVetsOutput | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [locationState, setLocationState] = useState<GeolocationState>('pending');
   const { toast } = useToast();
+  const [userStoredLocation] = useLocalStorage<{latitude: number; longitude: number} | null>('userLocation', null);
+
+  const userLocation = useMemo(() => {
+    if (userStoredLocation) {
+        return { lat: userStoredLocation.latitude, lng: userStoredLocation.longitude };
+    }
+    return null;
+  }, [userStoredLocation]);
 
   useEffect(() => {
-    if (!navigator.geolocation) {
-      setError("Geolocation is not supported by your browser. We can't find nearby vets without it.");
-      setLocationState('error');
+    if (!userLocation) {
+      setError("We couldn't access your location. Please ensure location was enabled during onboarding.");
       setIsLoading(false);
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocationState('success');
-        const locationString = `${position.coords.latitude}, ${position.coords.longitude}`;
-        getVets(locationString);
-      },
-      () => {
-        setError("We couldn't access your location. Please enable location services in your browser settings and refresh the page to find nearby vets.");
-        setLocationState('error');
-        setIsLoading(false);
-      },
-      { timeout: 10000 }
-    );
+    const locationString = `${userLocation.lat}, ${userLocation.lng}`;
+    getVets(locationString);
 
     async function getVets(location: string) {
       setIsLoading(true);
@@ -80,9 +76,9 @@ export default function VetResults({ animal }: VetResultsProps) {
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [animal, toast]);
+  }, [animal, toast, userLocation]);
 
-  if (isLoading || locationState === 'pending') {
+  if (isLoading) {
     return <VetSkeletonLoader animal={animal} />;
   }
 
@@ -92,6 +88,16 @@ export default function VetResults({ animal }: VetResultsProps) {
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    );
+  }
+  
+  if (!userLocation) {
+     return (
+      <Alert variant="destructive" className="max-w-2xl mx-auto">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Location not found</AlertTitle>
+        <AlertDescription>We need your location to find nearby vets. Please restart the app and allow location access.</AlertDescription>
       </Alert>
     );
   }
@@ -109,63 +115,70 @@ export default function VetResults({ animal }: VetResultsProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <h2 className="text-3xl font-bold font-headline text-center">Top Vets for {animal}s Near You</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {vets.map((vet, index) => (
-          <Card key={index} className="flex flex-col overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <div className="relative h-48 w-full">
-              <Image
-                src={vet.image || `https://picsum.photos/seed/vet${index}/600/400`}
-                alt={`Photo of ${vet.name}`}
-                fill
-                className="object-cover"
-                data-ai-hint="veterinarian clinic"
-              />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[70vh]">
+         <div className="relative">
+            <VetMap vets={vets} userLocation={userLocation} />
+         </div>
+         <ScrollArea className="h-full">
+            <div className="space-y-4 pr-4">
+                {vets.map((vet, index) => (
+                <Card key={index} className="flex flex-col overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <div className="relative h-40 w-full">
+                    <Image
+                        src={vet.image || `https://picsum.photos/seed/vet${index}/600/400`}
+                        alt={`Photo of ${vet.name}`}
+                        fill
+                        className="object-cover"
+                        data-ai-hint="veterinarian clinic"
+                    />
+                    </div>
+                    <CardHeader>
+                    <CardTitle className="text-xl font-headline">{vet.name}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-grow space-y-3 text-sm">
+                        <div className="flex items-start gap-3 text-muted-foreground">
+                            <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
+                            <span>{vet.address} ({vet.distance})</span>
+                        </div>
+                        <div className="flex items-start gap-3 text-muted-foreground">
+                            <Clock className="h-4 w-4 mt-1 flex-shrink-0" />
+                            <span>{vet.opening_hours}</span>
+                        </div>
+                        <div className="flex items-start gap-3 text-muted-foreground">
+                            <DollarSign className="h-4 w-4 mt-1 flex-shrink-0" />
+                            <span>{vet.fees}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-yellow-500">
+                            {[...Array(5)].map((_, i) => (
+                                <Star key={i} className={`h-5 w-5 ${i < (vet.rating || 0) ? 'fill-current' : 'text-gray-300'}`} />
+                            ))}
+                            <span className="font-bold text-base text-muted-foreground ml-1">{vet.rating ? `${vet.rating.toFixed(1)} / 5.0` : 'No rating'}</span>
+                        </div>
+                    </CardContent>
+                    <CardFooter className="bg-muted/50 p-3 grid grid-cols-2 gap-2">
+                        <Button asChild variant="outline" size="sm">
+                            <a href={`tel:${vet.phone_number}`}>
+                                <Phone />
+                                Call
+                            </a>
+                        </Button>
+                        <Button asChild variant="outline" size="sm">
+                            <a 
+                                href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(vet.address)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <MapPin />
+                                Directions
+                            </a>
+                        </Button>
+                    </CardFooter>
+                </Card>
+                ))}
             </div>
-            <CardHeader>
-              <CardTitle className="text-xl font-headline">{vet.name}</CardTitle>
-            </CardHeader>
-            <CardContent className="flex-grow space-y-3 text-sm">
-                <div className="flex items-start gap-3 text-muted-foreground">
-                    <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
-                    <span>{vet.address} ({vet.distance})</span>
-                </div>
-                <div className="flex items-start gap-3 text-muted-foreground">
-                    <Clock className="h-4 w-4 mt-1 flex-shrink-0" />
-                    <span>{vet.opening_hours}</span>
-                </div>
-                <div className="flex items-start gap-3 text-muted-foreground">
-                    <DollarSign className="h-4 w-4 mt-1 flex-shrink-0" />
-                    <span>{vet.fees}</span>
-                </div>
-                <div className="flex items-center gap-2 text-yellow-500">
-                    {[...Array(5)].map((_, i) => (
-                        <Star key={i} className={`h-5 w-5 ${i < (vet.rating || 0) ? 'fill-current' : 'text-gray-300'}`} />
-                    ))}
-                    <span className="font-bold text-base text-muted-foreground ml-1">{vet.rating ? `${vet.rating.toFixed(1)} / 5.0` : 'No rating'}</span>
-                </div>
-            </CardContent>
-            <CardFooter className="bg-muted/50 p-3 grid grid-cols-2 gap-2">
-                <Button asChild variant="outline" size="sm">
-                    <a href={`tel:${vet.phone_number}`}>
-                        <Phone />
-                        Call
-                    </a>
-                </Button>
-                <Button asChild variant="outline" size="sm">
-                    <a 
-                        href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(vet.address)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <MapPin />
-                        Directions
-                    </a>
-                </Button>
-            </CardFooter>
-          </Card>
-        ))}
+         </ScrollArea>
       </div>
     </div>
   );
@@ -176,25 +189,23 @@ const VetSkeletonLoader = ({ animal }: { animal: string }) => (
         <div className='text-center'>
             <Skeleton className="h-8 w-80 mx-auto mb-4" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(3)].map((_, i) => (
-                <Card key={i} className="flex flex-col overflow-hidden rounded-lg">
-                    <Skeleton className="h-48 w-full" />
-                    <CardHeader>
-                        <Skeleton className="h-6 w-3/4" />
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-5/6" />
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-2/3" />
-                    </CardContent>
-                    <CardFooter className="p-3 grid grid-cols-2 gap-2">
-                        <Skeleton className="h-9 w-full" />
-                        <Skeleton className="h-9 w-full" />
-                    </CardFooter>
-                </Card>
-            ))}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[70vh]">
+            <Skeleton className="h-full w-full rounded-lg" />
+            <div className="space-y-4">
+                {[...Array(2)].map((_, i) => (
+                    <Card key={i} className="flex flex-col overflow-hidden rounded-lg">
+                        <Skeleton className="h-40 w-full" />
+                        <CardHeader>
+                            <Skeleton className="h-6 w-3/4" />
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-5/6" />
+                            <Skeleton className="h-4 w-full" />
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
         </div>
     </div>
 );
