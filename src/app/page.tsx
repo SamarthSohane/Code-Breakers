@@ -18,24 +18,21 @@ export default function Home() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      // Start with authentication
+      // If the user has completed onboarding before, go to dashboard
       if (name && location) {
         router.push('/dashboard');
       } else {
+        // Otherwise, start the onboarding flow from the authentication step
         setView('auth');
       }
-    }, 3000); 
+    }, 3000); // Duration of the splash screen
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleAuthSuccess = () => {
-    // After auth, ask for location if we don't have it
-    if (location) {
-      handleLocationSuccess();
-    } else {
-      setView('location');
-    }
+    // After auth, ask for location
+    setView('location');
   };
 
   const handleLocationSuccess = (position?: GeolocationPosition) => {
@@ -45,21 +42,13 @@ export default function Home() {
         longitude: position.coords.longitude,
       });
     }
-    // After location, ask for name if we don't have it
-    if (name) {
-      router.push('/dashboard');
-    } else {
-      setView('nameInput');
-    }
+    // After location, ask for name
+    setView('nameInput');
   };
 
   const handleLocationError = () => {
-    // If location fails, proceed to name input
-    if (name) {
-      router.push('/dashboard');
-    } else {
-      setView('nameInput');
-    }
+    // If location fails or is skipped, still proceed to name input
+    setView('nameInput');
   };
   
   const handleNameSubmit = (newName: string) => {
@@ -76,7 +65,8 @@ export default function Home() {
       case 'nameInput':
         return <NameInputPage onNameSubmit={handleNameSubmit} />;
       default:
-        return null;
+        // Render nothing during the splash screen phase, as it's an overlay
+        return null; 
     }
   }
 
